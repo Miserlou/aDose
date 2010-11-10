@@ -9,13 +9,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.media.SoundPool.OnLoadCompleteListener;
 import android.net.Uri;
 import android.os.Environment;
 
@@ -30,17 +34,19 @@ public class BrainwaveSequence {
     public Activity parent;
     
     private final int duration = 1; // seconds
-    private final int sampleRate = 8000;
+    private final int sampleRate = 44100;
     private int numSamples = duration * sampleRate;
-    private double lSample[] = new double[numSamples];
-    private double rSample[] = new double[numSamples];
+    private double lSample[];// = new double[numSamples];
+    private double rSample[];// = new double[numSamples];
     int boffset = 0;
     
     private File tempFile;
     public FileOutputStream out;
     
     public AudioTrack audioTrack;
-    public byte generatedSnd[] = new byte[4 * numSamples];
+    public SoundPool soundPool;
+    public HashMap<String, Integer> soundMap = new HashMap<String, Integer>();
+    public byte generatedSnd[];// = new byte[4 * numSamples];
     
     public BrainwaveSequence(String f, Activity p) {
         filename = f;
@@ -61,6 +67,7 @@ public class BrainwaveSequence {
             e.printStackTrace();
         }
         
+        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 100);
 
     }
     
@@ -124,7 +131,7 @@ public class BrainwaveSequence {
         BrainwaveElement be;
         for(int i=0;i<sequence.size();i++) {
             be = sequence.get(i);
-            genTone(be.leftFreq, be.rightFreq, be.duration/1000);
+            genTone(be.leftFreq, be.rightFreq, be.duration/10000);
             System.out.println("Generated tone!: " + be.leftFreq + " " + be.rightFreq);
         }
         try {
@@ -137,45 +144,55 @@ public class BrainwaveSequence {
         tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/brain.pcm");
         
 //        numSamples = getTotalLength()/1000 * duration * sampleRate;
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-                AudioFormat.ENCODING_PCM_16BIT, numSamples,
-                AudioTrack.MODE_STREAM);
+//        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+//                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+//                AudioFormat.ENCODING_PCM_16BIT, numSamples,
+//                AudioTrack.MODE_STREAM);
     }
     
-    void genTone(double lFreqOfTone, double rFreqOfTone, int length){
+    void genTone(final double lFreqOfTone, final double rFreqOfTone, int length){
         
         
         System.out.println("length is..");
         System.out.println(length);
+       
+        lSample = new double[sampleRate*2];
+        rSample = new double[sampleRate*2];
         
-        lSample = new double[numSamples];
-        rSample = new double[numSamples];
-        
-        
-        for (int i = 0; i < numSamples; ++i) {
+        int i=0;
+        for (i = 0; i < lSample.length; ++i) {
             lSample[i] = Math.sin(2 * Math.PI * i / (sampleRate/lFreqOfTone));
-        }
-        for (int i = 0; i < numSamples; ++i) {
             rSample[i] = Math.sin(-2 * Math.PI * i / (sampleRate/rFreqOfTone));
+            if((Math.abs((lSample[i] - rSample[i])) < .0001) && (i != 0) && (Math.abs((lSample[i] - lSample[0])) < .00000001) && (Math.abs((rSample[i] - rSample[0])) < .00000001) && i>1000000) {
+                System.out.println("Victory!");
+                System.out.println(Math.abs((lSample[i] - rSample[i])));
+                System.out.println(i);
+                break;
+            }
         }
+        
+        double[] lSampleT = new double[i];
+        double[] rSampleT = new double[i];
+        
+        System.arraycopy(lSample, 0, lSampleT, 0, i);
+        System.arraycopy(rSample, 0, rSampleT, 0, i);
 
         // convert to 16 bit pcm sound array
         // assumes the sample buffer is normalised.
         
-        generatedSnd = new byte[4 * numSamples];
+        generatedSnd = new byte[(4 * lSampleT.length)];
         
         double dVal, dVal2;
         short val, val2;
         int idx = 0;
-            for(int i=0; i<rSample.length; i++) {
-                dVal = lSample[i];
+            for(int j=0; j<rSampleT.length; j++) {
+                dVal = lSampleT[j];
                 val = (short) ((dVal * 32767));
                 // in 16 bit wav PCM, first byte is the low order byte
                 generatedSnd[idx++] = (byte) (val & 0x00ff);
                 generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
                 
-                dVal2 = rSample[i];
+                dVal2 = rSampleT[j];
                 val2 = (short) ((dVal2 * 32767));
                 // in 16 bit wav PCM, first byte is the low order byte
                 generatedSnd[idx++] = (byte) (val2 & 0x00ff);
@@ -184,12 +201,55 @@ public class BrainwaveSequence {
             
             
             try {
-              for(int j=0;j<length;j++) {
-                  out.write(generatedSnd);
+//              for(int j=0;j<length;j++) {
+//                  out.write(generatedSnd);
+//              }
+              
+              tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".pcm");
+              
+              if(soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+                  return;
               }
+              else{
+                  System.out.println(soundMap);
+              }
+              
+              if (!tempFile.exists()) {
+                  tempFile.createNewFile();
+                }
+              else{
+                  tempFile.delete();
+                  tempFile.createNewFile();
+              }
+              out = new FileOutputStream(tempFile, false);
+              out.write(generatedSnd);
+              out.flush();
+              out.close();
+              
+              String s = Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".pcm";
+              String in = Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".pcm";
+              String out = Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".ogg";
+              System.out.println(s);
+              if(!soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+                  VorbisEncoder.encode(in, out);
+                  System.out.println("Loading sample..");
+                  soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
+
+                    public void onLoadComplete(SoundPool arg0, int arg1,
+                            int arg2) {
+                            System.out.println("Woo!");
+                            soundMap.put("" + lFreqOfTone + rFreqOfTone, new Integer(arg1));
+                        
+                    }});
+                    soundPool.load(out, 1);
+                  
+                  while(!soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+                      continue;}
+                  
+              }
+              
               System.out.println("Writing snd " + generatedSnd.length);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
@@ -244,7 +304,19 @@ public class BrainwaveSequence {
         System.out.println("Playing?!");
     }
     
+    public void playSample(String s, int duration) {
+        System.out.println(s);
+        System.out.println(soundMap);
+        int t = soundMap.get(s);
+        System.out.println(s);
+        soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+    }
     
+    public void pauseSample(String s) {
+        int t = soundMap.get(s);
+        soundPool.stop(t);
+//        soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+    }
     
     
     
@@ -334,6 +406,26 @@ public class BrainwaveSequence {
         
         return bytes;
         }
+    
+    public static double gcd(double a, double b) {      
+        if (b==0)
+            return a;
+        else
+            return gcd(b, a % b);
+    }
+   
+    public static double lcm(double a, double b) {
+        return (a / gcd(a, b)) * b;
+    }
+
+    double roundTwoDecimals(double d) {
+        DecimalFormat twoDForm = new DecimalFormat("#.##");
+    return Double.valueOf(twoDForm.format(d));
+}
+    double roundThreeDecimals(double d) {
+        DecimalFormat twoDForm = new DecimalFormat("#.###");
+    return Double.valueOf(twoDForm.format(d));
+}
 
         
 }

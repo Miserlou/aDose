@@ -33,6 +33,7 @@ public class PlaySound extends Activity {
     public Panel panel;
 
     private final byte generatedSnd[] = new byte[4 * numSamples];
+    public BrainwaveSequence bs;
 
     Handler handler = new Handler();
 
@@ -40,6 +41,7 @@ public class PlaySound extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         panel = new Panel(this);
+        panel.setKeepScreenOn(true);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -62,8 +64,9 @@ public class PlaySound extends Activity {
             public void run() {
                 genTone();
                 
-                BrainwaveSequence bs = new BrainwaveSequence("meditation.drugs", a);
-//                BrainwaveSequence bs = new BrainwaveSequence("short.drugs", a);
+//                bs = new BrainwaveSequence("meditation.drugs", a);
+//                bs = new BrainwaveSequence("short.drugs", a);
+                bs = new BrainwaveSequence("smooth.drugs", a);
                 bs.load();
 //                be.play();
                 
@@ -78,6 +81,7 @@ public class PlaySound extends Activity {
                     o.setHz((long) (Math.abs(be.leftFreq - be.rightFreq)));
                     o.setDuration(be.duration);
                     o.setColors(be.leftOffColor, be.leftOnColor, be.rightOffColor, be.rightOnColor);
+                    o.setFreqs(new Double(be.leftFreq).toString(), new Double(be.rightFreq).toString());
                     handler.postDelayed(o, toDur);
                     toDur = toDur + be.duration;
                 }
@@ -126,13 +130,13 @@ public class PlaySound extends Activity {
     }
 
     void playSound(){
-        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-                AudioFormat.ENCODING_PCM_16BIT, numSamples,
-                AudioTrack.MODE_STATIC);
-        audioTrack.write(generatedSnd, 0, numSamples);
-        audioTrack.setLoopPoints(0, generatedSnd.length/16, -1);
-        audioTrack.play();
+//        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+//                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
+//                AudioFormat.ENCODING_PCM_16BIT, numSamples,
+//                AudioTrack.MODE_STATIC);
+//        audioTrack.write(generatedSnd, 0, numSamples);
+//        audioTrack.setLoopPoints(0, generatedSnd.length/16, -1);
+//        audioTrack.play();
     }
     
     
@@ -148,6 +152,9 @@ public class PlaySound extends Activity {
         private String rPaintOn;
         private String rPaintOff;
         
+        private String lFreq;
+        private String rFreq;
+        
         boolean hasSpawned = false;
         
         Oscillator previous;
@@ -162,6 +169,7 @@ public class PlaySound extends Activity {
             
             if(previous != null) {
                 System.out.println("Removing.");
+                previous.pause();
                 handler.removeCallbacks(previous);
                 previous = null;
             }
@@ -171,6 +179,10 @@ public class PlaySound extends Activity {
                 panel.lPaintOff.setColor(Color.parseColor(lPaintOff));
                 panel.rPaintOn.setColor(Color.parseColor(rPaintOn));
                 panel.rPaintOff.setColor(Color.parseColor(rPaintOff)); 
+                
+                if(bs != null) {
+                    bs.playSample(lFreq+rFreq, duration);
+                }
             }
             
             panel.flipStatus();
@@ -183,6 +195,7 @@ public class PlaySound extends Activity {
             else {
                 System.out.println("Removin!");
                 handler.removeCallbacks(this);
+                bs.pauseSample(lFreq+rFreq);
             }
         }
         
@@ -198,6 +211,11 @@ public class PlaySound extends Activity {
             duration = t;
         }
         
+        public void setFreqs(String l, String r) {
+            lFreq = l;
+            rFreq = r;
+        }
+        
         public void setColors(String lColorOn, String lColorOff, String rColorOff, String rColorOn) {
             lPaintOn = lColorOn;
             rPaintOn = rColorOn;
@@ -205,6 +223,10 @@ public class PlaySound extends Activity {
             rPaintOff = rColorOff;
 
              
+        }
+        
+        public void pause() {
+            bs.pauseSample(lFreq+rFreq);
         }
     }
     
@@ -231,11 +253,11 @@ public class PlaySound extends Activity {
 
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
             if (bitmap != null) {
-                bitmap .recycle();
+                bitmap.recycle();
             }
             canvas= new Canvas();
-            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            canvas.setBitmap(bitmap);
+//            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+//            canvas.setBitmap(bitmap);
         }
         public void destroy() {
             if (bitmap != null) {
