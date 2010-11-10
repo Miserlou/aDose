@@ -18,21 +18,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class PlaySound extends Activity {
-    // originally from http://marblemice.blogspot.com/2010/04/generate-and-play-tone-in-android.html
-    // and modified by Steve Pomeroy <steve@staticfree.info>
-    // then by Rich Jones <rich@anomos.info>
-    private final int duration = 60; // seconds
-    private final int sampleRate = 8000;
-    private final int numSamples = duration * sampleRate;
-    private final double sample[] = new double[numSamples];
-    private final double lSample[] = new double[numSamples];
-    private final double rSample[] = new double[numSamples];
-    private final double freqOfTone = 60; // hz
-    private final double lFreqOfTone = 400; // hz
-    private final double rFreqOfTone = 72; // hz
-    public Panel panel;
 
-    private final byte generatedSnd[] = new byte[4 * numSamples];
+    public Panel panel;
     public BrainwaveSequence bs;
 
     Handler handler = new Handler();
@@ -62,13 +49,10 @@ public class PlaySound extends Activity {
         
         final Thread thread = new Thread(new Runnable() {
             public void run() {
-                genTone();
-                
 //                bs = new BrainwaveSequence("meditation.drugs", a);
 //                bs = new BrainwaveSequence("short.drugs", a);
                 bs = new BrainwaveSequence("smooth.drugs", a);
                 bs.load();
-//                be.play();
                 
                 BrainwaveElement be;
                 Oscillator o = null;
@@ -90,56 +74,7 @@ public class PlaySound extends Activity {
         thread.start();
     }
 
-    void genTone(){
-        // fill out the array
-        for (int i = 0; i < numSamples; ++i) {
-            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));
-        }
-        for (int i = 0; i < numSamples; ++i) {
-            lSample[i] = Math.sin(2 * Math.PI * i / (sampleRate/lFreqOfTone));
-        }
-        for (int i = 0; i < numSamples; ++i) {
-            rSample[i] = Math.sin(-2 * Math.PI * i / (sampleRate/rFreqOfTone));
-        }
 
-        // convert to 16 bit pcm sound array
-        // assumes the sample buffer is normalised.
-        int idx = 0;
-        for(int i=0; i<sample.length; i++) {
-            final double dVal = lSample[i];
-            final short val = (short) ((dVal * 32767));
-            // in 16 bit wav PCM, first byte is the low order byte
-            generatedSnd[idx++] = (byte) (val & 0x00ff);
-            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
-            
-            final double dVal2 = rSample[i];
-            final short val2 = (short) ((dVal2 * 32767));
-            // in 16 bit wav PCM, first byte is the low order byte
-            generatedSnd[idx++] = (byte) (val2 & 0x00ff);
-            generatedSnd[idx++] = (byte) ((val2 & 0xff00) >>> 8);
-        }
-//        
-//        for (final double dVal : sample) {
-//            // scale to maximum amplitude
-//            final short val = (short) ((dVal * 32767));
-//            // in 16 bit wav PCM, first byte is the low order byte
-//            generatedSnd[idx++] = (byte) (val & 0x00ff);
-//            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
-//
-//        }
-    }
-
-    void playSound(){
-//        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-//                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-//                AudioFormat.ENCODING_PCM_16BIT, numSamples,
-//                AudioTrack.MODE_STATIC);
-//        audioTrack.write(generatedSnd, 0, numSamples);
-//        audioTrack.setLoopPoints(0, generatedSnd.length/16, -1);
-//        audioTrack.play();
-    }
-    
-    
     public class Oscillator implements Runnable {
         
         long hz;
@@ -222,7 +157,6 @@ public class PlaySound extends Activity {
             lPaintOff = lColorOff;
             rPaintOff = rColorOff;
 
-             
         }
         
         public void pause() {

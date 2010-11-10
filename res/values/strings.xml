@@ -2,4 +2,6 @@
 <resources>
     <string name="hello">Hello World, PlaySound!</string>
     <string name="app_name">aDose</string>
+    <string name="choose_sequence">Choose Sequence!</string>
+    <string name="about">About / Tutorial</string>
 </resources>

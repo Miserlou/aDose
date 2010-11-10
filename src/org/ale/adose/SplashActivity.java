@@ -14,7 +14,7 @@ import android.view.WindowManager;
 
 public class SplashActivity extends Activity { 
       
-     private final int SPLASH_DISPLAY_LENGHT = 3000; 
+     private final int SPLASH_DELAY_LENGTH = 5000; 
      private Handler mHandler; 
      
      /** Called when the activity is first created. */ 
@@ -37,11 +37,11 @@ public class SplashActivity extends Activity {
 
             public void run() {
                 // TODO Auto-generated method stub
-                Intent mainIntent = new Intent(SplashActivity.this,PlaySound.class); 
+                Intent mainIntent = new Intent(SplashActivity.this,MainMenuActivity.class); 
                 SplashActivity.this.startActivity(mainIntent); 
                 SplashActivity.this.finish();
                 
-            }}, 3000);
+            }}, SPLASH_DELAY_LENGTH);
  
      }
      
