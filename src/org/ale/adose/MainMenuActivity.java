@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -35,13 +36,54 @@ public class MainMenuActivity extends Activity {
     public void onStart(){
     	super.onStart();
         
-    	Button b1 = (Button)findViewById(R.id.seq);
+    	final Button b1 = (Button)findViewById(R.id.seq);
 //    	Button b2 = (Button)findViewById(R.id.email);
     	
         b1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 //            	Intent km = new Intent(MainMenuActivity.this, TextMenuActivity.class);
 //            	startActivity(km);
+            }
+        });
+        b1.setOnTouchListener(new View.OnTouchListener() {
+            
+            public boolean onTouch(View v, MotionEvent event) {
+                
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    b1.setBackgroundResource(R.drawable.button_pressed);
+//                    b1.setText(R.string.choose_sequence);
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    b1.setBackgroundResource(R.drawable.button);
+//                    b1.setText("Ballsdick");
+                }
+                
+                return true;
+            }
+        });
+        
+        
+        final Button b2 = (Button)findViewById(R.id.about);
+//      Button b2 = (Button)findViewById(R.id.email);
+        
+        b2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+//              Intent km = new Intent(MainMenuActivity.this, TextMenuActivity.class);
+//              startActivity(km);
+            }
+        });
+        b2.setOnTouchListener(new View.OnTouchListener() {
+            
+            public boolean onTouch(View v, MotionEvent event) {
+                
+                if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                    b2.setBackgroundResource(R.drawable.button_pressed);
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    b2.setBackgroundResource(R.drawable.button);
+                }
+                
+                return false;
             }
         });
         
