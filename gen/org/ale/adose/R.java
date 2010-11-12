@@ -14,20 +14,34 @@ public final class R {
         public static final int button=0x7f020000;
         public static final int button_pressed=0x7f020001;
         public static final int icon=0x7f020002;
-        public static final int logo=0x7f020003;
-        public static final int menubg=0x7f020004;
-        public static final int splash=0x7f020005;
+        public static final int listactbg=0x7f020003;
+        public static final int listbg=0x7f020004;
+        public static final int logo=0x7f020005;
+        public static final int menubg=0x7f020006;
+        public static final int splash=0x7f020007;
     }
     public static final class id {
         public static final int about=0x7f050003;
+        public static final int cell_header=0x7f050005;
+        public static final int cell_header_border=0x7f050006;
+        public static final int detailstext=0x7f050008;
+        public static final int episode_id=0x7f05000a;
+        public static final int layout=0x7f05000b;
+        public static final int list_header_in_cell=0x7f050004;
+        public static final int listview=0x7f05000c;
+        public static final int mp3_url=0x7f050009;
         public static final int out=0x7f050000;
         public static final int s1=0x7f050002;
         public static final int seq=0x7f050001;
+        public static final int titletext=0x7f050007;
     }
     public static final class layout {
-        public static final int main=0x7f030000;
-        public static final int menu=0x7f030001;
-        public static final int splash=0x7f030002;
+        public static final int detailed_menu_shape_selected=0x7f030000;
+        public static final int main=0x7f030001;
+        public static final int menu=0x7f030002;
+        public static final int result_row=0x7f030003;
+        public static final int seq_list=0x7f030004;
+        public static final int splash=0x7f030005;
     }
     public static final class string {
         public static final int about=0x7f040003;

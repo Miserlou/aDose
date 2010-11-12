@@ -41,30 +41,29 @@ public class MainMenuActivity extends Activity {
     	
         b1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//            	Intent km = new Intent(MainMenuActivity.this, TextMenuActivity.class);
-//            	startActivity(km);
+                System.out.println("On click");
+            	Intent km = new Intent(MainMenuActivity.this, SequenceListActivity.class);
+            	startActivity(km);
             }
         });
+        
         b1.setOnTouchListener(new View.OnTouchListener() {
             
             public boolean onTouch(View v, MotionEvent event) {
                 
                 if(event.getAction() == MotionEvent.ACTION_DOWN) {
                     b1.setBackgroundResource(R.drawable.button_pressed);
-//                    b1.setText(R.string.choose_sequence);
                 }
                 if(event.getAction() == MotionEvent.ACTION_UP) {
                     b1.setBackgroundResource(R.drawable.button);
-//                    b1.setText("Ballsdick");
                 }
                 
-                return true;
+                return false;
             }
         });
         
         
         final Button b2 = (Button)findViewById(R.id.about);
-//      Button b2 = (Button)findViewById(R.id.email);
         
         b2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -86,13 +85,6 @@ public class MainMenuActivity extends Activity {
                 return false;
             }
         });
-        
-//        b2.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-////            	Intent km = new Intent(MainMenuActivity.this, EmailMenuActivity.class);
-////            	startActivity(km);
-//            }
-//        });
     	
     }
     

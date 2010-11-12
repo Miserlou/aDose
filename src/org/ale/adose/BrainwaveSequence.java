@@ -48,6 +48,9 @@ public class BrainwaveSequence {
     public HashMap<String, Integer> soundMap = new HashMap<String, Integer>();
     public byte generatedSnd[];// = new byte[4 * numSamples];
     
+    public String name = "Name";
+    public String description = "Description";
+    
     public BrainwaveSequence(String f, Activity p) {
         filename = f;
         parent = p;
@@ -69,6 +72,19 @@ public class BrainwaveSequence {
         
         soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 100);
 
+    }
+    
+    public void setNameDesc(String n, String d) {
+        name = n;
+        description = d;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public String getDescription() {
+        return description;
     }
     
     public void readFile() {
