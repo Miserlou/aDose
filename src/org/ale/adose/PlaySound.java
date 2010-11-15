@@ -21,6 +21,7 @@ import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,6 +42,7 @@ public class PlaySound extends Activity {
     
     Button loaded_button;
     ProgressBar pBar;
+    Boolean dShowing = true;
 
     Handler handler = new Handler();
     boolean loaded = false;
@@ -145,6 +147,17 @@ public class PlaySound extends Activity {
         }
     }
     
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        
+        if(dShowing) {
+            if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_SEARCH) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public void makeLoadingDialog() {
         
         final Dialog dialoog = new Dialog(this, R.style.CustomDialogTheme);
@@ -153,6 +166,7 @@ public class PlaySound extends Activity {
         final LayoutInflater factory = getLayoutInflater();
         final View cView = factory.inflate(R.layout.dialog, null);
         loaded_button = (Button) cView.findViewById(R.id.loaded);
+        //XXX make sure loaded_button onclick sets dShowing = false !!!
         loaded_button.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
