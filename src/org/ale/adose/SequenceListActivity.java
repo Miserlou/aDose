@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,10 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class SequenceListActivity extends Activity {
 	
@@ -60,7 +62,16 @@ public class SequenceListActivity extends Activity {
         SequenceAdapter sa = new SequenceAdapter(this);
         sa.setList(lm);
         lv.setAdapter(sa);
+        final Context c = this;
+        lv.setOnItemClickListener(new OnItemClickListener(){
+            
+            public void onItemClick(AdapterView arg0, View arg1, int arg2, long arg3) {
+                Intent i = new Intent(c, PlaySound.class);
+                c.startActivity(i);
+                return;
+        }
 
+    });
     }
     
     @Override
