@@ -46,6 +46,7 @@ public class PlaySound extends Activity {
 
     Handler handler = new Handler();
     boolean loaded = false;
+    Thread thread2;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,7 @@ public class PlaySound extends Activity {
                 // TODO Auto-generated method stub
                 bs = new BrainwaveSequence("smooth.drugs", a);
                 bs.load();
+                loaded = true;
                 return null;
             }
             @Override
@@ -97,7 +99,7 @@ public class PlaySound extends Activity {
         
         aTask1.execute(null);
         
-        final Thread thread2 = new Thread(new Runnable() {
+        thread2 = new Thread(new Runnable() {
             public void run() {
                 BrainwaveElement be;
                 Oscillator o = null;
@@ -117,26 +119,14 @@ public class PlaySound extends Activity {
             }
         });
         
-//        new AlertDialog.Builder(this)
-//        .setMessage("Loading..")
-//        .setPositiveButton("Okay!", new OnClickListener() {
-//
-//            public void onClick(DialogInterface dialog, int which) {
-//                if(loaded) {
-//                    thread2.start();
-//                }
-//                else{
-//                    makeLoadingDialog();
-//                }
-//                
-//            }})
-//        .show();
-        
         makeLoadingDialog();
     }
     
     public void onPause() {
         super.onPause();
+        if(thread2 != null) {
+            thread2.stop();
+        }
         finish();
     }
     
@@ -167,52 +157,42 @@ public class PlaySound extends Activity {
         final View cView = factory.inflate(R.layout.dialog, null);
         loaded_button = (Button) cView.findViewById(R.id.loaded);
         //XXX make sure loaded_button onclick sets dShowing = false !!!
+        
         loaded_button.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
-                System.out.println("On touched!");
+                  final Thread thread2 = new Thread(new Runnable() {
+                  public void run() {
+                      BrainwaveElement be;
+                      Oscillator o = null;
+                      int toDur = 0;
+                      
+                      for(int i=0; i < bs.sequence.size(); i++) {
+                          be = bs.sequence.get(i);
+                          System.out.println("Making Oscillator");
+                          o = new Oscillator(o);
+                          o.setHz((long) (Math.abs(be.leftFreq - be.rightFreq)));
+                          o.setDuration(be.duration);
+                          o.setColors(be.leftOffColor, be.leftOnColor, be.rightOffColor, be.rightOnColor);
+                          o.setFreqs(new Double(be.leftFreq).toString(), new Double(be.rightFreq).toString());
+                          handler.postDelayed(o, toDur);
+                          toDur = toDur + be.duration;
+                      }
+                  }
+              });
+              
+              if(loaded) {
+                  dialoog.hide();
+                  dShowing = false;
+                  thread2.start();
+              }
                 return false;
             }});
+        
         pBar = (ProgressBar)cView.findViewById(R.id.progressbar);
         
         dialoog.setContentView(cView);
         dialoog.show();
-        
-//        new AlertDialog.Builder(this)
-//        .setMessage("Loading..")
-//        .setPositiveButton("Okay!", new OnClickListener() {
-//
-//            public void onClick(DialogInterface dialog, int which) {
-//                
-//                final Thread thread2 = new Thread(new Runnable() {
-//                    public void run() {
-//                        BrainwaveElement be;
-//                        Oscillator o = null;
-//                        int toDur = 0;
-//                        
-//                        for(int i=0; i < bs.sequence.size(); i++) {
-//                            be = bs.sequence.get(i);
-//                            System.out.println("Making Oscillator");
-//                            o = new Oscillator(o);
-//                            o.setHz((long) (Math.abs(be.leftFreq - be.rightFreq)));
-//                            o.setDuration(be.duration);
-//                            o.setColors(be.leftOffColor, be.leftOnColor, be.rightOffColor, be.rightOnColor);
-//                            o.setFreqs(new Double(be.leftFreq).toString(), new Double(be.rightFreq).toString());
-//                            handler.postDelayed(o, toDur);
-//                            toDur = toDur + be.duration;
-//                        }
-//                    }
-//                });
-//                
-//                if(loaded) {
-//                    thread2.start();
-//                }
-//                else{
-//                    makeLoadingDialog();
-//                }
-//                
-//            }})
-//        .show();
         
     }
 

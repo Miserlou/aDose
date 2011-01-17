@@ -13,7 +13,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.R;
 import android.app.Activity;
+import android.content.res.AssetManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -51,11 +53,13 @@ public class BrainwaveSequence {
     public String name = "Name";
     public String description = "Description";
     
+    public AssetManager assetManager;
+    int last = -1;
+    
     public BrainwaveSequence(String f, Activity p) {
         filename = f;
         parent = p;
         tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/brain.pcm");
-        System.out.println(tempFile.getPath());
         try {
             if (!tempFile.exists()) {
                 tempFile.createNewFile();
@@ -66,11 +70,10 @@ public class BrainwaveSequence {
             }
             out = new FileOutputStream(tempFile, true);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
-        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 100);
+        soundPool = new SoundPool(20, AudioManager.STREAM_MUSIC, 100);
 
     }
     
@@ -125,7 +128,7 @@ public class BrainwaveSequence {
                   sequence.add(be);
               }
               catch(Exception e) {
-                  System.out.println(e);
+                  e.printStackTrace(); 
                   System.out.println("Oh bugger.");
                   continue;
               }
@@ -141,15 +144,63 @@ public class BrainwaveSequence {
     
     public void load() {
         readFile();
-//        generatedSnd = new byte[4 * numSamples * (getTotalLength()/1000)];
+        assetManager = parent.getAssets();
+        String[] oggs = new String[1];
+        try {
+            oggs = assetManager.list("oggs");
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return;
+            
+        }
+        System.out.println("OGGS!");
+        System.out.println(oggs);
+        ArrayList ogal = new ArrayList();
+        for(int ii=0; ii<oggs.length; ii++) {
+            ogal.add(oggs[ii]);
+            System.out.println(oggs[ii]);
+        }
         
+        SoundMapLoadOnCompleteListener listener = new SoundMapLoadOnCompleteListener();
         
         BrainwaveElement be;
         for(int i=0;i<sequence.size();i++) {
             be = sequence.get(i);
-            genTone(be.leftFreq, be.rightFreq, be.duration/10000);
-            System.out.println("Generated tone!: " + be.leftFreq + " " + be.rightFreq);
+            
+            // Have we pre-generated this tone? If not, generate it, else just load it.
+            
+            //Loaded already?
+            if(!soundMap.containsKey("" + be.leftFreq + be.rightFreq)) {
+                //Pregenerated, load it
+                if(ogal.contains("" + be.leftFreq + be.rightFreq + ".ogg")){
+                    
+                    listener.setStrings("" + be.leftFreq, "" + be.rightFreq);
+                    soundPool.setOnLoadCompleteListener(listener);
+                    try {
+                        soundPool.load(assetManager.openFd("oggs/" + be.leftFreq + be.rightFreq + ".ogg") , 1);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        return;
+                    }
+                      
+                    //XXX: This is really bad
+                    while(!soundMap.containsKey("" + be.leftFreq + be.rightFreq)) {
+                      continue;}
+                    
+                }
+                //Not pre-generated, create it now
+                else {
+                    System.out.println("Generating a new tone!!");
+                    genTone(be.leftFreq, be.rightFreq, be.duration/10000);
+                }
+            }
+            // We've already loaded this.
+            else {
+                continue;
+            }
         }
+  
         try {
             out.flush();
             out.close();
@@ -159,12 +210,9 @@ public class BrainwaveSequence {
         
         tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/brain.pcm");
         
-//        numSamples = getTotalLength()/1000 * duration * sampleRate;
-//        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-//                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-//                AudioFormat.ENCODING_PCM_16BIT, numSamples,
-//                AudioTrack.MODE_STREAM);
     }
+    
+    
     
     void genTone(final double lFreqOfTone, final double rFreqOfTone, int length){
         
@@ -270,68 +318,25 @@ public class BrainwaveSequence {
             }
 
     }
-
-    public void play(){
-//        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-//                sampleRate, AudioFormat.CHANNEL_CONFIGURATION_STEREO,
-//                AudioFormat.ENCODING_PCM_16BIT, numSamples,
-//                AudioTrack.MODE_STATIC);
-        
-        
-//        audioTrack.play();
-//        System.out.println(getBytesFromFile().length);
-//        int len = getBytesFromFile().length;
-//        audioTrack.write(getBytesFromFile(), 0, len);
-        
-//        for(int i=0;i<(tempFile.length()/8000);i++) {
-//            audioTrack.write(getSomeBytesFromFile(8000), 0, 8000);
-//        }
-        
-//        while(audioTrack.write(getSomeBytesFromFile(numSamples), 0, numSamples)>1) {
-//            System.out.println("Writing!");
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
-//        }
-        
-//        MediaPlayer mp = MediaPlayer.create(parent.getBaseContext(), tempFile.toURI());
-        MediaPlayer mp = new MediaPlayer();
-        try {
-            FileInputStream ffis = new FileInputStream(tempFile);
-            mp.setDataSource(ffis.getFD());
-//            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            System.out.println(tempFile.getAbsolutePath());
-            mp.prepare();
-            mp.start();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        System.out.println("Playing?!");
-    }
     
     public void playSample(String s, int duration) {
-        System.out.println(s);
-        System.out.println(soundMap);
         int t = soundMap.get(s);
-        System.out.println(s);
-        soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+        System.out.println("Attempting to play sample");
+        if(last != -1) {
+            soundPool.pause(last);
+        }
+        try{
+            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+        }
+        catch(Exception e) {
+            System.out.println("Fuck");
+            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+        }
     }
     
     public void pauseSample(String s) {
         int t = soundMap.get(s);
         soundPool.stop(t);
-//        soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
     }
     
     
@@ -442,6 +447,22 @@ public class BrainwaveSequence {
         DecimalFormat twoDForm = new DecimalFormat("#.###");
     return Double.valueOf(twoDForm.format(d));
 }
+    
+    public class SoundMapLoadOnCompleteListener implements OnLoadCompleteListener {
+        String l;
+        String r;
+        
+        public void setStrings(String a, String b) {
+            l = a;
+            r = b;
+        }
+        
+        public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+            soundMap.put("" + l + r, new Integer(sampleId));
+            
+        }
+        
+    }
 
         
 }
