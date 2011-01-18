@@ -1,23 +1,14 @@
 package org.ale.adose;
 
-import java.util.Iterator;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,17 +19,14 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnTouchListener;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class PlaySound extends Activity {
 
     public Panel panel;
     public BrainwaveSequence bs;
+    public String seqPath;
     
     Button loaded_button;
     ProgressBar pBar;
@@ -46,7 +34,10 @@ public class PlaySound extends Activity {
 
     Handler handler = new Handler();
     boolean loaded = false;
+    Thread thread;
     Thread thread2;
+    
+    Dialog dialoog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +50,7 @@ public class PlaySound extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         
         setContentView(panel);
+        seqPath = getIntent().getStringExtra("sequence");
         }
 
     @Override
@@ -67,25 +59,14 @@ public class PlaySound extends Activity {
         
         AudioManager mgr = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         mgr.setStreamVolume(AudioManager.STREAM_MUSIC, 70, 0);
-
         
         final Activity a = this;
-        
-//        final Thread thread = new Thread(new Runnable() {
-//            public void run() {
-////                bs = new BrainwaveSequence("meditation.drugs", a);
-////                bs = new BrainwaveSequence("short.drugs", a);
-//                bs = new BrainwaveSequence("smooth.drugs", a);
-//                bs.load();
-//                makeLoadingButton();
-//            }});
         
         AsyncTask aTask1 = new AsyncTask() {
 
             @Override
             protected Object doInBackground(Object... arg0) {
-                // TODO Auto-generated method stub
-                bs = new BrainwaveSequence("smooth.drugs", a);
+                bs = new BrainwaveSequence(seqPath, a);
                 bs.load();
                 loaded = true;
                 return null;
@@ -98,36 +79,11 @@ public class PlaySound extends Activity {
         };
         
         aTask1.execute(null);
-        
-        thread2 = new Thread(new Runnable() {
-            public void run() {
-                BrainwaveElement be;
-                Oscillator o = null;
-                int toDur = 0;
-                
-                for(int i=0; i < bs.sequence.size(); i++) {
-                    be = bs.sequence.get(i);
-                    System.out.println("Making Oscillator");
-                    o = new Oscillator(o);
-                    o.setHz((long) (Math.abs(be.leftFreq - be.rightFreq)));
-                    o.setDuration(be.duration);
-                    o.setColors(be.leftOffColor, be.leftOnColor, be.rightOffColor, be.rightOnColor);
-                    o.setFreqs(new Double(be.leftFreq).toString(), new Double(be.rightFreq).toString());
-                    handler.postDelayed(o, toDur);
-                    toDur = toDur + be.duration;
-                }
-            }
-        });
-        
         makeLoadingDialog();
     }
     
     public void onPause() {
         super.onPause();
-        if(thread2 != null) {
-            thread2.stop();
-        }
-        finish();
     }
     
     public void makeLoadingButton() {
@@ -150,18 +106,17 @@ public class PlaySound extends Activity {
     
     public void makeLoadingDialog() {
         
-        final Dialog dialoog = new Dialog(this, R.style.CustomDialogTheme);
+        dialoog = new Dialog(this, R.style.CustomDialogTheme);
         dialoog.setContentView(R.layout.dialog);
         
         final LayoutInflater factory = getLayoutInflater();
         final View cView = factory.inflate(R.layout.dialog, null);
         loaded_button = (Button) cView.findViewById(R.id.loaded);
-        //XXX make sure loaded_button onclick sets dShowing = false !!!
         
         loaded_button.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
-                  final Thread thread2 = new Thread(new Runnable() {
+                  thread2 = new Thread(new Runnable() {
                   public void run() {
                       BrainwaveElement be;
                       Oscillator o = null;
@@ -175,6 +130,9 @@ public class PlaySound extends Activity {
                           o.setDuration(be.duration);
                           o.setColors(be.leftOffColor, be.leftOnColor, be.rightOffColor, be.rightOnColor);
                           o.setFreqs(new Double(be.leftFreq).toString(), new Double(be.rightFreq).toString());
+                          if(handler == null) {
+                              return;
+                          }
                           handler.postDelayed(o, toDur);
                           toDur = toDur + be.duration;
                       }
@@ -240,7 +198,16 @@ public class PlaySound extends Activity {
             }
             
             if(finisher) {
+                if(thread2 != null) {
+                    thread2.stop();
+                }
+                thread2=null;
+                bs.stop();
+                handler.removeCallbacks(this);
+                dialoog.dismiss();
+                handler = null;
                 endSequence();
+                System.out.println("Finishing..?");
                 return;
             }
             
@@ -297,15 +264,10 @@ public class PlaySound extends Activity {
         
         public void pause() {
             System.out.println("pauzin");
-            bs.pauseSample(lFreq+rFreq);
+            bs.pauseSample();
         }
         
         public void endSequence() {
-            System.out.println("Sequence finished!");
-            System.out.println("Sequence finished!");
-            System.out.println("Sequence finished!");
-            System.out.println("Sequence finished!");
-            System.out.println("Sequence finished!");
             System.out.println("Sequence finished!");
             finish();
         }

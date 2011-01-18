@@ -11,7 +11,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import com.android.soundpool.example.MediaPlayerPool;
 import com.android.soundpool.example.MediaPlayerPools;
@@ -49,10 +51,7 @@ public class BrainwaveSequence {
     private File tempFile;
     public FileOutputStream out;
     
-    public AudioTrack audioTrack;
-    public SoundPool soundPool;
     public MediaPlayerPools mediaPlayerPools;
-    public HashMap<String, Integer> soundMap = new HashMap<String, Integer>();
     public HashMap<String, MediaPlayerPool> poolMap = new HashMap<String, MediaPlayerPool>();
     public byte generatedSnd[];// = new byte[4 * numSamples];
     
@@ -81,7 +80,6 @@ public class BrainwaveSequence {
             e.printStackTrace();
         }
         
-        soundPool = new SoundPool(20, AudioManager.STREAM_MUSIC, 100);
         mediaPlayerPools = new MediaPlayerPools(p);
 
     }
@@ -170,8 +168,6 @@ public class BrainwaveSequence {
             System.out.println(oggs[ii]);
         }
         
-        SoundMapLoadOnCompleteListener listener = new SoundMapLoadOnCompleteListener();
-        
         BrainwaveElement be;
         for(int i=0;i<sequence.size();i++) {
             be = sequence.get(i);
@@ -183,10 +179,7 @@ public class BrainwaveSequence {
                 //Pregenerated, load it
                 if(ogal.contains("" + be.leftFreq + be.rightFreq + ".ogg")){
                     
-                    listener.setStrings("" + be.leftFreq, "" + be.rightFreq);
-                    soundPool.setOnLoadCompleteListener(listener);
-                    
-                    poolMap.put("" + be.leftFreq + be.rightFreq, mediaPlayerPools.add("oggs/" + be.leftFreq + be.rightFreq + ".ogg", 1));
+                    poolMap.put("" + be.leftFreq + be.rightFreq, mediaPlayerPools.add("oggs/" + be.leftFreq + be.rightFreq + ".ogg", 1, true));
                 }
                 else {
                     System.out.println("Generating a new tone!!");
@@ -261,17 +254,13 @@ public class BrainwaveSequence {
             
             
             try {
-//              for(int j=0;j<length;j++) {
-//                  out.write(generatedSnd);
-//              }
-              
               tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".pcm");
               
-              if(soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+              if(poolMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
                   return;
               }
               else{
-                  System.out.println(soundMap);
+                  System.out.println(poolMap);
               }
               
               if (!tempFile.exists()) {
@@ -290,20 +279,12 @@ public class BrainwaveSequence {
               String in = Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".pcm";
               String out = Environment.getExternalStorageDirectory().getPath() + "/" + lFreqOfTone + rFreqOfTone +".ogg";
               System.out.println(s);
-              if(!soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+              if(!poolMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
                   VorbisEncoder.encode(in, out);
                   System.out.println("Loading sample..");
-                  soundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
-
-                    public void onLoadComplete(SoundPool arg0, int arg1,
-                            int arg2) {
-                            System.out.println("Woo!");
-                            soundMap.put("" + lFreqOfTone + rFreqOfTone, new Integer(arg1));
-                        
-                    }});
-                    soundPool.load(out, 1);
+                    poolMap.put("" + lFreqOfTone + rFreqOfTone, mediaPlayerPools.add(out, 1, false));
                   
-                  while(!soundMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
+                  while(!poolMap.containsKey("" + lFreqOfTone + rFreqOfTone)) {
                       continue;}
                   
               }
@@ -342,10 +323,22 @@ public class BrainwaveSequence {
 //        int t = soundMap.get(s);
 //        soundPool.stop(t);
 //    }
-    public void pauseSample(String s) {
+    public void pauseSample() {
         if(lastStream != null) {
             System.out.println("Pausing");
             lastStream.pause();
+        }
+    }
+    
+    public void stop() {
+        Iterator it;
+        Collection<MediaPlayerPool> c = poolMap.values();
+        it = c.iterator();
+        while(it.hasNext()) {
+            MediaPlayerPool mpp = (MediaPlayerPool) it.next();
+            if(mpp != null) {
+                mpp.dispose();
+            }
         }
     }
     
@@ -458,22 +451,5 @@ public class BrainwaveSequence {
     return Double.valueOf(twoDForm.format(d));
 }
     
-    public class SoundMapLoadOnCompleteListener implements OnLoadCompleteListener {
-        String l;
-        String r;
-        
-        public void setStrings(String a, String b) {
-            l = a;
-            r = b;
-        }
-        
-        public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-            soundMap.put("" + l + r, new Integer(sampleId));
-            
-        }
-        
-    }
-
-        
 }
 

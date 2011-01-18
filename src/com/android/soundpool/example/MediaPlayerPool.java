@@ -20,42 +20,72 @@ public final class MediaPlayerPool
 	public MediaPlayerPool(
 			final Context context,
 			final String path,
-			final int maxStreams)
+			final int maxStreams,
+	        final boolean asset)
 	{
 		Pool pool = new Pool();
-		AssetManager am = context.getAssets();
-        for (int i = 0; i < maxStreams; ++i)
-        {
-            System.out.println("file:///android_asset/" + path);
-            MediaPlayer player = new MediaPlayer(); 
-            try {
-                
-                System.out.println(am.openFd(path));
-                System.out.println(path);
-                AssetFileDescriptor amfd = am.openFd(path);
-                player.setDataSource(amfd.getFileDescriptor(), amfd.getStartOffset(), amfd.getLength());
-                amfd.close();
-                player.setOnPreparedListener(new OnPreparedListener() {
-
-                    public void onPrepared(MediaPlayer mp) {
-                        // TODO Auto-generated method stub
-                        System.out.println("Oh we prepared.");
-                    }
+		if(asset) {
+    		AssetManager am = context.getAssets();
+            for (int i = 0; i < maxStreams; ++i)
+            {
+                System.out.println("file:///android_asset/" + path);
+                MediaPlayer player = new MediaPlayer(); 
+                try {
                     
-                });
-                player.prepare();
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalStateException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                    System.out.println(am.openFd(path));
+                    System.out.println(path);
+                    AssetFileDescriptor amfd = am.openFd(path);
+                    player.setDataSource(amfd.getFileDescriptor(), amfd.getStartOffset(), amfd.getLength());
+                    amfd.close();
+                    player.setOnPreparedListener(new OnPreparedListener() {
+    
+                        public void onPrepared(MediaPlayer mp) {
+                            // TODO Auto-generated method stub
+                            System.out.println("Oh we prepared.");
+                        }
+                        
+                    });
+                    player.prepare();
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalStateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                pool.add(player);
             }
-            pool.add(player);
-        }
+		}
+		else {
+		    for (int i = 0; i < maxStreams; ++i)
+            {
+                MediaPlayer player = new MediaPlayer(); 
+                try {
+                    player.setDataSource(path);
+                    player.setOnPreparedListener(new OnPreparedListener() {
+    
+                        public void onPrepared(MediaPlayer mp) {
+                            System.out.println("Oh we prepared.");
+                        }
+                        
+                    });
+                    player.prepare();
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalStateException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                pool.add(player);
+            }
+		}
         mPool = pool;
 	}
 	

@@ -21,9 +21,10 @@ public final class MediaPlayerPools
 	
 	public MediaPlayerPool add(
 			final String filepath,
-			final int maxStreams)
+			final int maxStreams,
+			final boolean asset)
 	{
-		MediaPlayerPool pool = new MediaPlayerPool(mContext, filepath, maxStreams);
+		MediaPlayerPool pool = new MediaPlayerPool(mContext, filepath, maxStreams, asset);
 		mPools.put(filepath, pool);
 		return pool;
 	}

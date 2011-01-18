@@ -45,16 +45,16 @@ public class SequenceListActivity extends Activity {
         
         // Brainwave Sequences
         // XXX: Make directory-based
-        BrainwaveSequence bs0 = new BrainwaveSequence(null, null);
+        BrainwaveSequence bs0 = new BrainwaveSequence("meditation.drugs", null);
         bs0.setNameDesc("Meditation", "The classic Meditation sequence, by Mitch Altman");
         lm.add(bs0);
-        BrainwaveSequence bs1 = new BrainwaveSequence(null, null);
+        BrainwaveSequence bs1 = new BrainwaveSequence("short.drugs", null);
         bs1.setNameDesc("Stereoscopic Meditation", "A stereoscopic version of the classic");
         lm.add(bs1);
-        BrainwaveSequence bs2 = new BrainwaveSequence(null, null);
+        BrainwaveSequence bs2 = new BrainwaveSequence("smooth.drugs", null);
         bs2.setNameDesc("Sleep", "A nice sequence before bed, by ???XXX???");
         lm.add(bs2);
-        BrainwaveSequence bs3 = new BrainwaveSequence(null, null);
+        BrainwaveSequence bs3 = new BrainwaveSequence("focus.drugs", null);
         bs3.setNameDesc("Focus", "Lots of Alpha and Beta for better focus, by Rich Jones");
         lm.add(bs3);
         
@@ -67,6 +67,9 @@ public class SequenceListActivity extends Activity {
             
             public void onItemClick(AdapterView arg0, View arg1, int arg2, long arg3) {
                 Intent i = new Intent(c, PlaySound.class);
+                BrainwaveSequence t = lm.get(arg2);
+                i.putExtra("sequence", t.filename);
+                System.out.println("starting activity");
                 c.startActivity(i);
                 return;
         }
@@ -79,16 +82,6 @@ public class SequenceListActivity extends Activity {
     	super.onStart();
         
     	
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-    	super.onCreateOptionsMenu(menu);
-    	
-    	MenuItem mi = menu.add(0,0,0,"Shell");
-    	mi.setIcon(android.R.drawable.ic_menu_manage);
-
-    	return true;
     }
     
     @Override
