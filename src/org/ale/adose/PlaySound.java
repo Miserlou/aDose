@@ -178,6 +178,13 @@ public class PlaySound extends Activity {
                           handler.postDelayed(o, toDur);
                           toDur = toDur + be.duration;
                       }
+                      o = new Oscillator(o);
+                      o.setHz((long) (1));
+                      o.setDuration(5);
+                      o.setColors("#ffffff", "#ffffff", "#ffffff", "#ffffff");
+                      o.setFreqs(new Double(1).toString(), new Double(1).toString());
+                      o.finisher = true;
+                      handler.postDelayed(o, toDur);
                   }
               });
               
@@ -216,6 +223,8 @@ public class PlaySound extends Activity {
         
         Oscillator previous;
         
+        public boolean finisher = false;
+        
         public Oscillator(Oscillator pre) {
             if(pre != null) {
                 previous = pre;
@@ -225,10 +234,13 @@ public class PlaySound extends Activity {
         public void run() {
             
             if(previous != null) {
-                System.out.println("Removing.");
                 previous.pause();
                 handler.removeCallbacks(previous);
                 previous = null;
+            }
+            
+            if(finisher) {
+                endSequence();
             }
             
             if(!hasSpawned) {
@@ -238,6 +250,7 @@ public class PlaySound extends Activity {
                 panel.rPaintOff.setColor(Color.parseColor(rPaintOff)); 
                 
                 if(bs != null) {
+                    System.out.println("playing sampl");
                     bs.playSample(lFreq+rFreq, duration);
                 }
             }
@@ -252,7 +265,7 @@ public class PlaySound extends Activity {
             else {
                 System.out.println("Removin!");
                 handler.removeCallbacks(this);
-                bs.pauseSample(lFreq+rFreq);
+//                bs.pauseSample(lFreq+rFreq);
             }
         }
         
@@ -282,7 +295,18 @@ public class PlaySound extends Activity {
         }
         
         public void pause() {
+            System.out.println("pauzin");
             bs.pauseSample(lFreq+rFreq);
+        }
+        
+        public void endSequence() {
+            System.out.println("Sequence finished!");
+            System.out.println("Sequence finished!");
+            System.out.println("Sequence finished!");
+            System.out.println("Sequence finished!");
+            System.out.println("Sequence finished!");
+            System.out.println("Sequence finished!");
+            finish();
         }
     }
     

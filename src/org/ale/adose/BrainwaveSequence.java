@@ -13,6 +13,10 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.android.soundpool.example.MediaPlayerPool;
+import com.android.soundpool.example.MediaPlayerPools;
+import com.android.soundpool.example.MediaPlayerStream;
+
 import android.R;
 import android.app.Activity;
 import android.content.res.AssetManager;
@@ -47,14 +51,18 @@ public class BrainwaveSequence {
     
     public AudioTrack audioTrack;
     public SoundPool soundPool;
+    public MediaPlayerPools mediaPlayerPools;
     public HashMap<String, Integer> soundMap = new HashMap<String, Integer>();
+    public HashMap<String, MediaPlayerPool> poolMap = new HashMap<String, MediaPlayerPool>();
     public byte generatedSnd[];// = new byte[4 * numSamples];
     
     public String name = "Name";
     public String description = "Description";
     
     public AssetManager assetManager;
+    
     int last = -1;
+    MediaPlayerStream lastStream;
     
     public BrainwaveSequence(String f, Activity p) {
         filename = f;
@@ -74,6 +82,7 @@ public class BrainwaveSequence {
         }
         
         soundPool = new SoundPool(20, AudioManager.STREAM_MUSIC, 100);
+        mediaPlayerPools = new MediaPlayerPools(p);
 
     }
     
@@ -170,26 +179,15 @@ public class BrainwaveSequence {
             // Have we pre-generated this tone? If not, generate it, else just load it.
             
             //Loaded already?
-            if(!soundMap.containsKey("" + be.leftFreq + be.rightFreq)) {
+            if(!poolMap.containsKey("" + be.leftFreq + be.rightFreq)) {
                 //Pregenerated, load it
                 if(ogal.contains("" + be.leftFreq + be.rightFreq + ".ogg")){
                     
                     listener.setStrings("" + be.leftFreq, "" + be.rightFreq);
                     soundPool.setOnLoadCompleteListener(listener);
-                    try {
-                        soundPool.load(assetManager.openFd("oggs/" + be.leftFreq + be.rightFreq + ".ogg") , 1);
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        return;
-                    }
-                      
-                    //XXX: This is really bad
-                    while(!soundMap.containsKey("" + be.leftFreq + be.rightFreq)) {
-                      continue;}
                     
+                    poolMap.put("" + be.leftFreq + be.rightFreq, mediaPlayerPools.add("oggs/" + be.leftFreq + be.rightFreq + ".ogg", 1));
                 }
-                //Not pre-generated, create it now
                 else {
                     System.out.println("Generating a new tone!!");
                     genTone(be.leftFreq, be.rightFreq, be.duration/10000);
@@ -211,8 +209,6 @@ public class BrainwaveSequence {
         tempFile = new File(Environment.getExternalStorageDirectory().getPath() + "/brain.pcm");
         
     }
-    
-    
     
     void genTone(final double lFreqOfTone, final double rFreqOfTone, int length){
         
@@ -319,24 +315,38 @@ public class BrainwaveSequence {
 
     }
     
+//    public void playSample(String s, int duration) {
+//        int t = soundMap.get(s);
+//        System.out.println("Attempting to play sample");
+//        if(last != -1) {
+//            soundPool.pause(last);
+//        }
+//        try{
+//            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+//        }
+//        catch(Exception e) {
+//            System.out.println("Fuck");
+//            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
+//        }
+//    }
+    
     public void playSample(String s, int duration) {
-        int t = soundMap.get(s);
+        MediaPlayerPool mp = poolMap.get(s);
         System.out.println("Attempting to play sample");
-        if(last != -1) {
-            soundPool.pause(last);
-        }
-        try{
-            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
-        }
-        catch(Exception e) {
-            System.out.println("Fuck");
-            last = soundPool.play(t, 0.99f, 0.99f, 1, -1, 1);
-        }
+        System.out.println("Playing..");
+        lastStream = mp.play(100, 100);
+        System.out.println("Playing!");
     }
     
+//    public void pauseSample(String s) {
+//        int t = soundMap.get(s);
+//        soundPool.stop(t);
+//    }
     public void pauseSample(String s) {
-        int t = soundMap.get(s);
-        soundPool.stop(t);
+        if(lastStream != null) {
+            System.out.println("Pausing");
+            lastStream.pause();
+        }
     }
     
     
