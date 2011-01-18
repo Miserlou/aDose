@@ -241,6 +241,7 @@ public class PlaySound extends Activity {
             
             if(finisher) {
                 endSequence();
+                return;
             }
             
             if(!hasSpawned) {
