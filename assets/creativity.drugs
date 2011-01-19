@@ -1,0 +1,49 @@
+# creativity.drugs
+# .drugs by Rich Jones
+# 2010 Creative Commons 2.5 Attrib Share Alike
+# lfreq, loffcolor, loncolor, rfreq, roff, ron, duration
+# delta = 402
+# theta = 406
+# alpha = 411
+# beta  = 415
+
+#delta
+#400,ffffff,000000,402,000000,ffffff,60000
+#beta
+#400,ffffff,000000,415,000000,ffffff,60000
+#alpha
+#400,641,ffffff,000000,411,000000,ffffff,10000
+#theta
+#400,641,ffffff,000000,406,000000,ffffff,10000
+
+#mediation
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,10000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,15000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,30000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,20000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,10000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,10000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,20000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,30000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,60000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,15000
+400,#ffffff,#FF00D9,406,#FF00D9,#ffffff,10000
+400,#ffffff,#F94D00,415,#F94D00,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,10000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,10000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,20000
+400,#ffffff,#F94D00,406,#F94D00,#ffffff,30000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,5000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,30000
+400,#ffffff,#F94D00,411,#F94D00,#ffffff,15000
+400,#ffffff,#FF00D9,406,#FF00D9,#ffffff,30000
+400,#ffffff,#FF00D9,415,#FF00D9,#ffffff,30000

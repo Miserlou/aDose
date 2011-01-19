@@ -222,7 +222,7 @@ public final class MediaPlayerPool
             
             public void pause()
             {
-                Node.this.release();
+//                Node.this.release();
             	mPlayer.pause();
             }
             

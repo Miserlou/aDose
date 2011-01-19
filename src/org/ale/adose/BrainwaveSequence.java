@@ -331,15 +331,16 @@ public class BrainwaveSequence {
     }
     
     public void stop() {
-        Iterator it;
-        Collection<MediaPlayerPool> c = poolMap.values();
-        it = c.iterator();
-        while(it.hasNext()) {
-            MediaPlayerPool mpp = (MediaPlayerPool) it.next();
-            if(mpp != null) {
-                mpp.dispose();
-            }
-        }
+//        Iterator it;
+//        Collection<MediaPlayerPool> c = poolMap.values();
+//        it = c.iterator();
+//        while(it.hasNext()) {
+//            MediaPlayerPool mpp = (MediaPlayerPool) it.next();
+//            if(mpp != null) {
+//                mpp.dispose();
+//            }
+//        }
+//        mediaPlayerPools.dispose();
     }
     
     

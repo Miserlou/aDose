@@ -48,7 +48,7 @@ public class SequenceListActivity extends Activity {
         BrainwaveSequence bs0 = new BrainwaveSequence("meditation.drugs", null);
         bs0.setNameDesc("Meditation", "The classic Meditation sequence, by Mitch Altman");
         lm.add(bs0);
-        BrainwaveSequence bs1 = new BrainwaveSequence("short.drugs", null);
+        BrainwaveSequence bs1 = new BrainwaveSequence("stereo_meditation.drugs", null);
         bs1.setNameDesc("Stereoscopic Meditation", "A stereoscopic version of the classic");
         lm.add(bs1);
         BrainwaveSequence bs2 = new BrainwaveSequence("sleep.drugs", null);
@@ -60,6 +60,18 @@ public class SequenceListActivity extends Activity {
         BrainwaveSequence bs4 = new BrainwaveSequence("rem.drugs", null);
         bs4.setNameDesc("REM", "Cycle of Theta and Beta, just like REM sleep. by Rich Jones");
         lm.add(bs4);
+        BrainwaveSequence bs5 = new BrainwaveSequence("short.drugs", null);
+        bs5.setNameDesc("SHORT", "Cycle of Theta and Beta, just like REM sleep. by Rich Jones");
+        lm.add(bs5);
+        BrainwaveSequence bs6 = new BrainwaveSequence("brain_machine.drugs", null);
+        bs6.setNameDesc("Brain Machine", "A colorized version of the Meditation sequence.");
+        lm.add(bs6);
+        BrainwaveSequence bs7 = new BrainwaveSequence("creativity.drugs", null);
+        bs7.setNameDesc("Creativity", "A high-beta sequence to induce creative thinking, by Rich Jones.");
+        lm.add(bs7);
+        BrainwaveSequence bs8 = new BrainwaveSequence("relax.drugs", null);
+        bs8.setNameDesc("Relax", "High alpha, low beta leading to theta and delta for ultimate relaxation. By SkipIntro.");
+        lm.add(bs8);
         
         lv = (ListView)findViewById(R.id.listview);
         SequenceAdapter sa = new SequenceAdapter(this);
