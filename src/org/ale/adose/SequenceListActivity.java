@@ -51,12 +51,15 @@ public class SequenceListActivity extends Activity {
         BrainwaveSequence bs1 = new BrainwaveSequence("short.drugs", null);
         bs1.setNameDesc("Stereoscopic Meditation", "A stereoscopic version of the classic");
         lm.add(bs1);
-        BrainwaveSequence bs2 = new BrainwaveSequence("smooth.drugs", null);
-        bs2.setNameDesc("Sleep", "A nice sequence before bed, by ???XXX???");
+        BrainwaveSequence bs2 = new BrainwaveSequence("sleep.drugs", null);
+        bs2.setNameDesc("Sleep", "A nice sequence before bed, by garagemonkeysan");
         lm.add(bs2);
         BrainwaveSequence bs3 = new BrainwaveSequence("focus.drugs", null);
         bs3.setNameDesc("Focus", "Lots of Alpha and Beta for better focus, by Rich Jones");
         lm.add(bs3);
+        BrainwaveSequence bs4 = new BrainwaveSequence("rem.drugs", null);
+        bs4.setNameDesc("REM", "Cycle of Theta and Beta, just like REM sleep. by Rich Jones");
+        lm.add(bs4);
         
         lv = (ListView)findViewById(R.id.listview);
         SequenceAdapter sa = new SequenceAdapter(this);

@@ -1,11 +1,11 @@
-# meditation2.drugs
+# meditation.drugs
 # based on Mitch Altman's SLM Firmware
 # ported to .drugs by Rich Jones
 # 2010 Creative Commons 2.5 Attrib Share Alike
 # lfreq, loffcolor, loncolor, rfreq, roff, ron, duration
 # delta = 402
 # theta = 406
-# alpha = 411.734
+# alpha = 411
 # beta  = 415
 
 #delta
