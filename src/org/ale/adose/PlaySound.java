@@ -1,5 +1,8 @@
 package org.ale.adose;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -12,6 +15,7 @@ import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,12 +36,17 @@ public class PlaySound extends Activity {
     ProgressBar pBar;
     Boolean dShowing = true;
 
-    Handler handler = new Handler();
+    Handler handler; 
     boolean loaded = false;
     Thread thread;
     Thread thread2;
     
     Dialog dialoog;
+    
+    ArrayList<Oscillator> osc = new ArrayList<Oscillator>();
+    ArrayList<Integer> times = new ArrayList<Integer>();
+    Oscillator current;
+    boolean paused = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,7 +60,22 @@ public class PlaySound extends Activity {
         
         setContentView(panel);
         seqPath = getIntent().getStringExtra("sequence");
-        }
+        
+        handler = new Handler(){
+            public void handleMessage(Message msg) {
+                
+                if(msg.what == 9909) {
+                    try {
+                        synchronized(this) {
+                            this.wait();
+                        }
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+             }}
+        };
+    }
 
     @Override
     protected void onResume() {
@@ -80,6 +104,7 @@ public class PlaySound extends Activity {
         
         aTask1.execute(null);
         makeLoadingDialog();
+        System.out.println(handler);
     }
     
     public void onPause() {
@@ -99,6 +124,45 @@ public class PlaySound extends Activity {
         if(dShowing) {
             if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_SEARCH) {
                 return true;
+            }
+        }
+        else if (keyCode == KeyEvent.KEYCODE_BACK){
+            if(!paused) 
+            {
+                if(current != null) {
+                    System.out.println("pausing..");
+                    current.pauseSample();
+                    current.pauseFlashing();
+                }
+                Iterator i = osc.iterator();
+                while(i.hasNext()) {
+                    System.out.println("Removing callback");
+                    handler.removeCallbacks((Runnable) i.next());
+                }
+//                handler.sendEmptyMessage(9909);
+//                synchronized(handler) {
+//                    try {
+//                        paused = true;
+//                        handler.wait();
+//                        loo
+//                    } catch (InterruptedException e) {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//                }
+                paused = true;
+            }
+            else {
+                int diff = times.size() - osc.size();
+                int timeDiff = times.get(diff+1);
+                System.out.println("Time diff..");
+                System.out.println(timeDiff);
+                for(int i=1; i< osc.size(); i++) {
+                    System.out.println("Posting..");
+                    System.out.println(times.get(i+diff)-timeDiff);
+                    handler.postDelayed(osc.get(i), (times.get(i+diff)-timeDiff));
+                }
+                paused = false;
             }
         }
         return false;
@@ -133,6 +197,11 @@ public class PlaySound extends Activity {
                           if(handler == null) {
                               return;
                           }
+                          if(i==0) {
+                              current = o;
+                          }
+                          osc.add(o);
+                          times.add(toDur);
                           handler.postDelayed(o, toDur);
                           toDur = toDur + be.duration;
                       }
@@ -142,10 +211,11 @@ public class PlaySound extends Activity {
                       o.setColors("#ffffff", "#ffffff", "#ffffff", "#ffffff");
                       o.setFreqs(new Double(1).toString(), new Double(1).toString());
                       o.finisher = true;
+                      osc.add(o);
+                      times.add(toDur);
                       handler.postDelayed(o, toDur);
                   }
               });
-              
               if(loaded) {
                   dialoog.hide();
                   dShowing = false;
@@ -158,7 +228,6 @@ public class PlaySound extends Activity {
         
         dialoog.setContentView(cView);
         dialoog.show();
-        
     }
 
 
@@ -178,6 +247,7 @@ public class PlaySound extends Activity {
         private String rFreq;
         
         boolean hasSpawned = false;
+        boolean paused = false;
         
         Oscillator previous;
         
@@ -192,9 +262,13 @@ public class PlaySound extends Activity {
         public void run() {
             
             if(previous != null) {
-                previous.pause();
+                previous.pauseSample();
                 handler.removeCallbacks(previous);
                 previous = null;
+                current = this;
+                if(osc.contains(this)) {
+                    osc.remove(this);
+                }
             }
             
             if(finisher) {
@@ -211,29 +285,28 @@ public class PlaySound extends Activity {
                 return;
             }
             
-            if(!hasSpawned) {
-                panel.lPaintOn.setColor(Color.parseColor(lPaintOn));
-                panel.lPaintOff.setColor(Color.parseColor(lPaintOff));
-                panel.rPaintOn.setColor(Color.parseColor(rPaintOn));
-                panel.rPaintOff.setColor(Color.parseColor(rPaintOff)); 
-                
-                if(bs != null) {
-                    System.out.println("playing sampl");
-                    bs.playSample(lFreq+rFreq, duration);
+            if(!paused) {
+                if(!hasSpawned) {
+                    panel.lPaintOn.setColor(Color.parseColor(lPaintOn));
+                    panel.lPaintOff.setColor(Color.parseColor(lPaintOff));
+                    panel.rPaintOn.setColor(Color.parseColor(rPaintOn));
+                    panel.rPaintOff.setColor(Color.parseColor(rPaintOff)); 
+                    
+                    if(bs != null) {
+                        bs.playSample(lFreq+rFreq, duration);
+                    }
                 }
-            }
-            
-            panel.flipStatus();
-            panel.invalidate();
-            count += (1000/hz);
-            if(count<duration) {
-                hasSpawned = true;
-                handler.postDelayed(this, 1000/hz);
-            }
-            else {
-                System.out.println("Removin!");
-                handler.removeCallbacks(this);
-//                bs.pauseSample(lFreq+rFreq);
+                
+                panel.flipStatus();
+                panel.invalidate();
+                count += (990/hz);
+                if(count<duration) {
+                    hasSpawned = true;
+                    handler.postDelayed(this, 990/hz);
+                }
+                else {
+                    handler.removeCallbacks(this);
+                }
             }
         }
         
@@ -262,9 +335,13 @@ public class PlaySound extends Activity {
 
         }
         
-        public void pause() {
-            System.out.println("pauzin");
+        public void pauseSample() {
+            System.out.println("Pausing sample..");
             bs.pauseSample();
+        }
+        
+        public void pauseFlashing() {
+            paused = true;
         }
         
         public void endSequence() {
