@@ -60,8 +60,8 @@ public class SequenceListActivity extends Activity {
         BrainwaveSequence bs4 = new BrainwaveSequence("rem.drugs", null);
         bs4.setNameDesc("REM", "Cycle of Theta and Beta, just like REM sleep. by Rich Jones");
         lm.add(bs4);
-        BrainwaveSequence bs5 = new BrainwaveSequence("short.drugs", null);
-        bs5.setNameDesc("SHORT", "Cycle of Theta and Beta, just like REM sleep. by Rich Jones");
+        BrainwaveSequence bs5 = new BrainwaveSequence("psych.drugs", null);
+        bs5.setNameDesc("Psychadelic", "A fast, colorful and trippy sequence, by Saxo.");
         lm.add(bs5);
         BrainwaveSequence bs6 = new BrainwaveSequence("brain_machine.drugs", null);
         bs6.setNameDesc("Brain Machine", "A colorized version of the Meditation sequence.");

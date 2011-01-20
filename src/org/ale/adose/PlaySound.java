@@ -198,6 +198,9 @@ public class PlaySound extends Activity {
                     if(handler != null) {
                         handler.removeCallbacks((Runnable) i.next());
                     }
+                    else{
+                        return;
+                    }
                 }
             }
         }
@@ -290,16 +293,23 @@ public void makePausedDialog() {
 
             public boolean onTouch(View v, MotionEvent event) {
                 int diff = times.size() - osc.size();
-                int timeDiff = times.get(diff+1);
-                System.out.println("Time diff..");
-                System.out.println(timeDiff);
-                for(int i=1; i< osc.size(); i++) {
-                    handler.postDelayed(osc.get(i), (times.get(i+diff)-timeDiff));
+                try {
+                    int timeDiff = times.get(diff+1);
+                    System.out.println("Time diff..");
+                    System.out.println(timeDiff);
+                    for(int i=1; i< osc.size(); i++) {
+                        handler.postDelayed(osc.get(i), (times.get(i+diff)-timeDiff));
+                    }
+                    paused = false;
+                    pauseDialog.hide();
+                    
+                    return paused;
                 }
-                paused = false;
-                pauseDialog.hide();
-                
-                return paused;
+                catch(Exception e) {
+                    paused = false;
+                    pauseDialog.hide();
+                    return false;
+                }
                 }
         });
         pauseDialog.setOnDismissListener(new OnDismissListener() {
