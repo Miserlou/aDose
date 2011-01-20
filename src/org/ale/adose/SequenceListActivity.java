@@ -103,7 +103,6 @@ public class SequenceListActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     		case 0:
-//    			startActivity(new Intent(this, ShellActivity.class));
     			return(true);
     	}
     	return(super.onOptionsItemSelected(item));

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -33,6 +35,7 @@ public class PlaySound extends Activity {
     public String seqPath;
     
     Button loaded_button;
+    Button resume_button;
     ProgressBar pBar;
     Boolean dShowing = true;
 
@@ -42,11 +45,15 @@ public class PlaySound extends Activity {
     Thread thread2;
     
     Dialog dialoog;
+    Dialog pauseDialog;
+    AsyncTask aTask1;
     
     ArrayList<Oscillator> osc = new ArrayList<Oscillator>();
     ArrayList<Integer> times = new ArrayList<Integer>();
     Oscillator current;
     boolean paused = false;
+    boolean running = false;
+    boolean nuked = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,20 +68,7 @@ public class PlaySound extends Activity {
         setContentView(panel);
         seqPath = getIntent().getStringExtra("sequence");
         
-        handler = new Handler(){
-            public void handleMessage(Message msg) {
-                
-                if(msg.what == 9909) {
-                    try {
-                        synchronized(this) {
-                            this.wait();
-                        }
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-             }}
-        };
+        handler = new Handler();
     }
 
     @Override
@@ -86,36 +80,76 @@ public class PlaySound extends Activity {
         
         final Activity a = this;
         
-        AsyncTask aTask1 = new AsyncTask() {
-
-            @Override
-            protected Object doInBackground(Object... arg0) {
-                bs = new BrainwaveSequence(seqPath, a);
-                bs.load();
-                loaded = true;
-                return null;
-            }
-            @Override
-            protected void onPostExecute(Object arg0) {
-                makeLoadingButton();
-            }
+        if(aTask1 == null) {
+            aTask1 = new AsyncTask() {
+    
+                @Override
+                protected Object doInBackground(Object... arg0) {
+                    if(seqPath == null) {
+                        finish();
+                        return null;
+                    }
+                    bs = new BrainwaveSequence(seqPath, a);
+                    bs.load();
+                    loaded = true;
+                    return null;
+                }
+                @Override
+                protected void onPostExecute(Object arg0) {
+                    makeLoadingButton();
+                }
+            
+            };
         
-        };
-        
-        aTask1.execute(null);
-        makeLoadingDialog();
-        System.out.println(handler);
+            aTask1.execute(null);
+            makeLoadingDialog();
+        }
     }
     
     public void onPause() {
         super.onPause();
     }
-    
+
     public void makeLoadingButton() {
         if(loaded_button != null) {
             loaded_button.setVisibility(View.VISIBLE);
             pBar.setVisibility(View.GONE);
         }
+    }
+    
+    public void onDestroy() {
+        super.onDestroy();
+//        stopSequence();
+        System.out.println("On destroying!");
+    }
+    
+    public void onStop() {
+        super.onStop();
+        stopSequence();
+        panel = null;
+        bs = null;
+        seqPath = null;
+        
+        loaded_button = null;
+        resume_button = null;
+        pBar = null;
+        dShowing = true;
+
+        handler = null; 
+        loaded = false;
+        thread = null;
+        thread2 = null;
+        
+        dialoog = null;
+        pauseDialog = null;
+        aTask1 = null;
+        
+        ArrayList<Oscillator> osc = new ArrayList<Oscillator>();
+        ArrayList<Integer> times = new ArrayList<Integer>();
+        current = null;
+        paused = false;
+        running = false;
+        nuked = true;
     }
     
     @Override
@@ -129,43 +163,44 @@ public class PlaySound extends Activity {
         else if (keyCode == KeyEvent.KEYCODE_BACK){
             if(!paused) 
             {
-                if(current != null) {
-                    System.out.println("pausing..");
-                    current.pauseSample();
-                    current.pauseFlashing();
-                }
-                Iterator i = osc.iterator();
-                while(i.hasNext()) {
-                    System.out.println("Removing callback");
-                    handler.removeCallbacks((Runnable) i.next());
-                }
-//                handler.sendEmptyMessage(9909);
-//                synchronized(handler) {
-//                    try {
-//                        paused = true;
-//                        handler.wait();
-//                        loo
-//                    } catch (InterruptedException e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
+                stopSequence();
+                paused = true;
+                makePausedDialog();
+            }
+            else {
+                finish();
+            }
+        }
+        else if (keyCode == KeyEvent.KEYCODE_HOME){
+            if(!paused) 
+            {
+                stopSequence();
                 paused = true;
             }
             else {
-                int diff = times.size() - osc.size();
-                int timeDiff = times.get(diff+1);
-                System.out.println("Time diff..");
-                System.out.println(timeDiff);
-                for(int i=1; i< osc.size(); i++) {
-                    System.out.println("Posting..");
-                    System.out.println(times.get(i+diff)-timeDiff);
-                    handler.postDelayed(osc.get(i), (times.get(i+diff)-timeDiff));
-                }
-                paused = false;
+                finish();
             }
         }
         return false;
+    }
+
+    private void stopSequence() {
+        if(!nuked) {
+            if(current != null) {
+                System.out.println("pausing..");
+                current.pauseSample();
+                current.pauseFlashing();
+            }
+            if(osc != null) {
+                Iterator i = osc.iterator();
+                while(i.hasNext()) {
+                    System.out.println("Removing callback");
+                    if(handler != null) {
+                        handler.removeCallbacks((Runnable) i.next());
+                    }
+                }
+            }
+        }
     }
     
     public void makeLoadingDialog() {
@@ -177,11 +212,13 @@ public class PlaySound extends Activity {
         final View cView = factory.inflate(R.layout.dialog, null);
         loaded_button = (Button) cView.findViewById(R.id.loaded);
         
+        System.out.println("Making loading dialog");
         loaded_button.setOnTouchListener(new OnTouchListener() {
 
             public boolean onTouch(View v, MotionEvent event) {
                   thread2 = new Thread(new Runnable() {
                   public void run() {
+                      System.out.println("thread2runnig");
                       BrainwaveElement be;
                       Oscillator o = null;
                       int toDur = 0;
@@ -216,18 +253,65 @@ public class PlaySound extends Activity {
                       handler.postDelayed(o, toDur);
                   }
               });
-              if(loaded) {
+              if(loaded & !running) {
+                  new Exception().printStackTrace();
                   dialoog.hide();
                   dShowing = false;
+                  System.out.println("Starting t2!!!");
                   thread2.start();
+                  running = true;
               }
                 return false;
             }});
+        dialoog.setOnDismissListener(new OnDismissListener() {
+
+            public void onDismiss(DialogInterface dialog) {
+                finish();
+            }
+            
+        });
         
         pBar = (ProgressBar)cView.findViewById(R.id.progressbar);
         
         dialoog.setContentView(cView);
         dialoog.show();
+    }
+    
+public void makePausedDialog() {
+        
+        pauseDialog = new Dialog(this, R.style.CustomDialogTheme);
+        pauseDialog.setContentView(R.layout.paused);
+        
+        final LayoutInflater factory = getLayoutInflater();
+        final View cView = factory.inflate(R.layout.paused, null);
+        resume_button = (Button) cView.findViewById(R.id.resume);
+        
+        resume_button.setOnTouchListener(new OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+                int diff = times.size() - osc.size();
+                int timeDiff = times.get(diff+1);
+                System.out.println("Time diff..");
+                System.out.println(timeDiff);
+                for(int i=1; i< osc.size(); i++) {
+                    handler.postDelayed(osc.get(i), (times.get(i+diff)-timeDiff));
+                }
+                paused = false;
+                pauseDialog.hide();
+                
+                return paused;
+                }
+        });
+        pauseDialog.setOnDismissListener(new OnDismissListener() {
+
+            public void onDismiss(DialogInterface dialog) {
+                finish();
+            }
+            
+        });
+        
+        pauseDialog.setContentView(cView);
+        pauseDialog.show();
     }
 
 

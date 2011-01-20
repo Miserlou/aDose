@@ -1,0 +1,64 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content" 
+    android:layout_height="fill_parent"
+    android:paddingLeft="0dip"
+    android:paddingRight="0dip">
+    
+	<TextView
+		android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"
+		android:textStyle="bold" 
+		android:textColor="#ffffffff"
+		android:textSize="32dip"
+		android:text="Loading.." 
+		android:gravity="center"
+		android:layout_gravity="center_vertical" />	    
+	
+	<View android:layout_width="wrap_content" 
+		android:layout_height="4dip" 
+		android:background="?android:attr/listDivider"/>
+
+	<TextView
+		android:layout_width="wrap_content" 
+		android:layout_height="fill_parent"
+		android:textColor="#ffffffff"
+		android:textSize="24dip"
+		android:text="This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do." 
+		android:gravity="center"
+		android:layout_gravity="center_vertical" />	
+		
+    <Button
+	    android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/resume"
+        android:text="Resume!"
+      	android:layout_gravity="center"
+	    android:layout_width="wrap_content" 
+		android:layout_height="90dip"
+		android:padding="20dip"
+		android:textColor="#000000"
+		android:background="@drawable/button"
+		android:shadowColor="#ffffff"
+		android:shadowDy="-1"
+		android:shadowRadius="1"
+		android:singleLine="true"
+		android:ellipsize="none" />
+		
+		    <TextView  
+	    android:id="@+id/loadingtext"
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    android:textAppearance="?android:attr/textAppearanceSmall"
+	    android:text="Please don't use this if you are prone to epileptic seizures."
+	    android:textColor="#ffffff"
+	    android:padding="7dip"
+        android:gravity="center"
+    	android:visibility="visible"
+    	
+    />
+   
+	<View android:layout_width="fill_parent" 
+		android:layout_height="4dp" 
+		android:background="?android:attr/listDivider"/>   
+       
+</LinearLayout>
