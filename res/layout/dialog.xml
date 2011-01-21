@@ -23,8 +23,8 @@
 		android:layout_width="wrap_content" 
 		android:layout_height="fill_parent"
 		android:textColor="#ffffffff"
-		android:textSize="24dip"
-		android:text="This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do." 
+		android:textSize="20dip"
+		android:text="Please make sure that you have headphones in and you are sitting or laying down comfortably in a dark room. Hold the phone directly in front of your eyes and relax yourself. If the light becomes too intense, close your eyes.\nWhen you are ready, press Begin to start."
 		android:gravity="center"
 		android:layout_gravity="center_vertical" />	
 		

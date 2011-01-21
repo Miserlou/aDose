@@ -11,7 +11,7 @@
 		android:textStyle="bold" 
 		android:textColor="#ffffffff"
 		android:textSize="32dip"
-		android:text="Loading.." 
+		android:text="Paused" 
 		android:gravity="center"
 		android:layout_gravity="center_vertical" />	    
 	
@@ -24,7 +24,7 @@
 		android:layout_height="fill_parent"
 		android:textColor="#ffffffff"
 		android:textSize="24dip"
-		android:text="This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do. This text explains what you need to do." 
+		android:text="The sequence is paused. To return to the menu, press back once again. To continue the sequence, press Resume." 
 		android:gravity="center"
 		android:layout_gravity="center_vertical" />	
 		

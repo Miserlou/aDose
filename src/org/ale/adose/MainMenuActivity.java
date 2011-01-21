@@ -1,6 +1,7 @@
 package org.ale.adose;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -91,6 +92,24 @@ public class MainMenuActivity extends Activity {
         });
     	
     }
+    
+public void onResume() {
+    super.onResume();
+    
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+  
+    final SharedPreferences.Editor editor2;
+    String first = prefs.getString("first_time", "fuck");
+    if(first.contains("fuck")){
+          new AlertDialog.Builder(this)
+          .setMessage("\tWelcome to aDose! Thank your for purchasing and supporting independent developers and creative applications! :) \n\n Before you try aDose, you should really press \'About\' and read the tutorial about how to use it properly.\n\n\tIf you encounter any bugs, please contact us at miserlou@gmail.com so we can fix them for you.\n\nEnjoy! (Also, if you enjoy this application, please remember to give us a five star review! Thanks!)\n" )
+          .setPositiveButton("Okay!", null)
+          .show();
+          editor2 = prefs.edit();
+          editor2.putString("first_time", "shitballs");
+          editor2.commit();
+    }
+}
     
 public void makeAboutDialog() {
         

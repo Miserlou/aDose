@@ -69,7 +69,7 @@ public class SequenceListActivity extends Activity {
         BrainwaveSequence bs7 = new BrainwaveSequence("creativity.drugs", null);
         bs7.setNameDesc("Creativity", "A high-beta sequence to induce creative thinking, by Rich Jones.");
         lm.add(bs7);
-        BrainwaveSequence bs8 = new BrainwaveSequence("relaxation.drugs", null);
+        BrainwaveSequence bs8 = new BrainwaveSequence("relax.drugs", null);
         bs8.setNameDesc("Relax", "High alpha, low beta leading to theta and delta for ultimate relaxation. By SkipIntro.");
         lm.add(bs8);
         

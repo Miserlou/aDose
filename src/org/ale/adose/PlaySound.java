@@ -167,7 +167,7 @@ public class PlaySound extends Activity {
                 return true;
             }
         }
-        else if (keyCode == KeyEvent.KEYCODE_BACK){
+        else if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU){
             if(!paused) 
             {
                 stopSequence();
@@ -314,7 +314,9 @@ public void makePausedDialog() {
                 }
                 catch(Exception e) {
                     paused = false;
-                    pauseDialog.hide();
+                    if(pauseDialog != null) {
+                        pauseDialog.hide();
+                    }
                     return false;
                 }
                 }
