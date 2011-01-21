@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -69,11 +70,16 @@ public class PlaySound extends Activity {
         seqPath = getIntent().getStringExtra("sequence");
         
         handler = new Handler();
+        
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = 100 / 100.0f;
+        getWindow().setAttributes(lp);
         
         AudioManager mgr = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         mgr.setStreamVolume(AudioManager.STREAM_MUSIC, 70, 0);
@@ -149,6 +155,7 @@ public class PlaySound extends Activity {
         current = null;
         paused = false;
         running = false;
+        
         nuked = true;
     }
     
