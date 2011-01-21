@@ -1,16 +1,21 @@
 package org.ale.adose;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 
 public class MainMenuActivity extends Activity {
@@ -67,8 +72,7 @@ public class MainMenuActivity extends Activity {
         
         b2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//              Intent km = new Intent(MainMenuActivity.this, TextMenuActivity.class);
-//              startActivity(km);
+                makeAboutDialog();
             }
         });
         b2.setOnTouchListener(new View.OnTouchListener() {
@@ -88,12 +92,33 @@ public class MainMenuActivity extends Activity {
     	
     }
     
+public void makeAboutDialog() {
+        
+        final Dialog pauseDialog = new Dialog(this, R.style.CustomDialogTheme);
+        pauseDialog.setContentView(R.layout.about);
+        
+        final LayoutInflater factory = getLayoutInflater();
+        final View cView = factory.inflate(R.layout.about, null);
+        Button resume_button = (Button) cView.findViewById(R.id.resume);
+        
+        resume_button.setOnTouchListener(new OnTouchListener() {
+
+            public boolean onTouch(View v, MotionEvent event) {
+                pauseDialog.hide();
+                return false;
+                }
+        });
+        
+        pauseDialog.setContentView(cView);
+        pauseDialog.show();
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
     	super.onCreateOptionsMenu(menu);
     	
-    	MenuItem mi = menu.add(0,0,0,"Shell");
-    	mi.setIcon(android.R.drawable.ic_menu_manage);
+    	MenuItem mi = menu.add(0,0,0,"About");
+    	mi.setIcon(android.R.drawable.ic_menu_help);
 
     	return true;
     }
@@ -102,7 +127,7 @@ public class MainMenuActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     		case 0:
-//    			startActivity(new Intent(this, ShellActivity.class));
+    		    makeAboutDialog();
     			return(true);
     	}
     	return(super.onOptionsItemSelected(item));
